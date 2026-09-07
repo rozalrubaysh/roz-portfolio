@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do | Roz Alrubaysh</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f6f7fb;
+  color: #171717;
+  padding: 30px 18px;
+}
+
+.container {
+  max-width: 650px;
+  margin: auto;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 25px;
+  color: #555;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 40px;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.07);
+  margin-bottom: 18px;
+}
+
+.add-row {
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  flex: 1;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  background: #171717;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.task:last-child {
+  border-bottom: 0;
+}
+
+.task-text {
+  flex: 1;
+}
+
+.completed .task-text {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.check {
+  width: 22px;
+  height: 22px;
+}
+
+.delete {
+  background: transparent;
+  color: #999;
+  padding: 5px 8px;
+  font-size: 18px;
+}
+
+.empty {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}
+
+.stats {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.note {
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  margin-top: 25px;
+}
+
+@media(max-width:500px) {
+  .add-row {
+    flex-direction: column;
+  }
+
+  h1 {
+    font-size: 34px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<a class="back" href="../../index.html">← Back to Portfolio</a>
+
+<h1>Interactive To-Do</h1>
+
+<p class="subtitle">
+A simple productivity project built to practice JavaScript interactions,
+DOM manipulation, and browser storage.
+</p>
+
+<div class="card">
+
+  <div class="add-row">
+    <input
+      id="taskInput"
+      type="text"
+      placeholder="What do you need to do?"
+    >
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+</div>
+
+<div class="card">
+
+  <div class="stats" id="stats"></div>
+
+  <div id="taskList"></div>
+
+</div>
+
+<div class="note">
+Built with HTML, CSS & JavaScript · Tasks stay saved in your browser
+</div>
+
+</div>
+
+<script>
+
+let tasks =
+  JSON.parse(localStorage.getItem("rozTasks")) || [];
+
+const input = document.getElementById("taskInput");
+const list = document.getElementById("taskList");
+const stats = document.getElementById("stats");
+
+function saveTasks() {
+  localStorage.setItem("rozTasks", JSON.stringify(tasks));
+}
+
+function renderTasks() {
+
+  list.innerHTML = "";
+
+  const completed =
+    tasks.filter(task => task.completed).length;
+
+  stats.textContent =
+    tasks.length === 0
+      ? "0 tasks"
+      : completed + " of " + tasks.length + " completed";
+
+  if (tasks.length === 0) {
+    list.innerHTML =
+      '<div class="empty">Nothing here yet. Add your first task.</div>';
+    return;
+  }
+
+  tasks.forEach((task, index) => {
+
+    const item = document.createElement("div");
+
+    item.className =
+      "task" + (task.completed ? " completed" : "");
+
+    item.innerHTML = `
+      <input
+        class="check"
+        type="checkbox"
+        ${task.completed ? "checked" : ""}
+        onchange="toggleTask(${index})"
+      >
+
+      <div class="task-text">${task.text}</div>
+
+      <button
+        class="delete"
+        onclick="deleteTask(${index})"
+        aria-label="Delete task"
+      >
+        ×
+      </button>
+    `;
+
+    list.appendChild(item);
+  });
+}
+
+function addTask() {
+
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  tasks.unshift({
+    text: text,
+    completed: false
+  });
+
+  input.value = "";
+
+  saveTasks();
+  renderTasks();
+}
+
+function toggleTask(index) {
+
+  tasks[index].completed =
+    !tasks[index].completed;
+
+  saveTasks();
+  renderTasks();
+}
+
+function deleteTask(index) {
+
+  tasks.splice(index, 1);
+
+  saveTasks();
+  renderTasks();
+}
+
+input.addEventListener("keydown", function(event) {
+
+  if (event.key === "Enter") {
+    addTask();
+  }
+
+});
+
+renderTasks();
+
+</script>
+
+</body>
+</html>
